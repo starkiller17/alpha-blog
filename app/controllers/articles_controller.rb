@@ -1,9 +1,10 @@
 class ArticlesController < ApplicationController
     
+    # Performs following action before doing any of the other 4 methods
+    before_action :set_article, only: [:show, :edit, :update, :destroy]
+
     def show
-        
         # To make this instance ariable we need to add @
-        @article = Article.find(params[:id])
     end
 
     def index
@@ -17,7 +18,7 @@ class ArticlesController < ApplicationController
 
     def create
         # Require the top level article and permit the two levels of article, title and description
-        @article = Article.new(params.require(:article).permit(:title, :description))
+        @article = Article.new(article_params)
         if @article.save
             # Use a flash helper that works as a hash, can bu sued with notice or alert
             flash[:notice] = "Article was created successfully"
@@ -28,17 +29,31 @@ class ArticlesController < ApplicationController
     end
 
     def edit
-        @article = Article.find(params[:id])
     end
 
     def update
-        @article = Article.find(params[:id])
-        if @article.update(params.require(:article).permit(:title, :description))
+        if @article.update(article_params)
             flash[:notice] = "Article was updated successfully."
             redirect_to @article
         else
             render 'edit'
         end
+    end
+
+    def destroy
+        @article.destroy
+        redirect_to articles_path
+    end
+
+    # Everything after private is only accessible to the controller
+    private
+    def set_article
+        @article = Article.find(params[:id])
+    end
+
+    private
+    def article_params
+        params.require(:article).permit(:title, :description)
     end
 
 end
