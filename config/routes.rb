@@ -4,4 +4,7 @@ Rails.application.routes.draw do
   get 'about', to: 'pages#about'
   # Gives all routes for the articles
   resources :articles
+
+  get 'signup', to: 'users#new'
+  resources :users, except:[:new]
 end
