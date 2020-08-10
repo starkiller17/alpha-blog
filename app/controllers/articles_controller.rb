@@ -2,6 +2,8 @@ class ArticlesController < ApplicationController
     
     # Performs following action before doing any of the other 4 methods
     before_action :set_article, only: [:show, :edit, :update, :destroy]
+    before_action :require_user, except: [:show, :index]
+    before_action :require_same_user, only: [:edit, :update, :destroy]
 
     def show
         # To make this instance ariable we need to add @
@@ -19,6 +21,7 @@ class ArticlesController < ApplicationController
     def create
         # Require the top level article and permit the two levels of article, title and description
         @article = Article.new(article_params)
+        @article.user = current_user
         if @article.save
             # Use a flash helper that works as a hash, can bu sued with notice or alert
             flash[:notice] = "Article was created successfully"
@@ -54,6 +57,13 @@ class ArticlesController < ApplicationController
     private
     def article_params
         params.require(:article).permit(:title, :description)
+    end
+
+    def require_same_user
+        if current_user != @article.user && !current_user.admin?
+            flash[:alert] = "You can only edit or delete your own article"
+            redirect_to @article
+        end
     end
 
 end
